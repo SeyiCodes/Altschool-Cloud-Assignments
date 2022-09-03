@@ -1,4 +1,4 @@
-# Altschool-Cloud Assignment 
+# Altschool-Cloud Assignment
 
 ## Exercise 1
 
@@ -11,10 +11,14 @@
 
 ---
 
-==This an image of my VagrantFile==
+```
+This an image of my VagrantFile
+```
 
 ![VagrantFile Image](./images/vagrantfile.jpg)
 
+```
 ==This is the output of the *ifconfig* command==
+```
 
 ![ifconfig](./images/ifconfig.jpg)
