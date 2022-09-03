@@ -18,7 +18,7 @@ This an image of my VagrantFile
 ![VagrantFile Image](./images/vagrantfile.jpg)
 
 ```
-==This is the output of the *ifconfig* command==
+This is the output of the ifconfig command
 ```
 
 ![ifconfig](./images/ifconfig.jpg)
