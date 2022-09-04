@@ -17,6 +17,7 @@ The ping command pings a specific network host, on the local network or on the I
 
 ![VagrantFile Image](./images/ping-command.jpg)
 
+---
 
 ```
 HISTORY
@@ -25,6 +26,7 @@ This shows the history of commands run on the terminal
 
 ![VagrantFile Image](./images/history-command2.jpg)
 
+---
 
 ```
 SORT
@@ -33,6 +35,7 @@ The sort command helps you sort lists by alphabetically,and it is case sensitive
 
 ![VagrantFile Image](./images/sort-command.jpg)
 
+---
 
 ```
 GREP
@@ -41,6 +44,7 @@ You can use grep to search in files, or combine it with pipes to filter the outp
 
 ![VagrantFile Image](./images/grep-command.jpg)
 
+---
 
 ```
 DIFF
@@ -49,6 +53,7 @@ The diff command will process files which contain almost the same information an
 
 ![VagrantFile Image](./images/diff-command.jpg)
 
+---
 
 ```
 WC
@@ -57,6 +62,7 @@ The wc command gives us useful information about a file or input it receives via
 
 ![VagrantFile Image](./images/wc-command.jpg)
 
+---
 
 ```
 PS
@@ -65,6 +71,7 @@ You can inspect them all running  processes using the ps command
 
 ![VagrantFile Image](./images/ps-command.jpg)
 
+---
 
 ```
 DU
@@ -73,6 +80,7 @@ The du command will calculate the size of a directory as a whole
 
 ![VagrantFile Image](./images/du-command.jpg)
 
+---
 
 ```
 DF
@@ -81,6 +89,7 @@ The df command is used to get disk usage information
 
 ![VagrantFile Image](./images/df-command.jpg)
 
+---
 
 ```
 TYPE
@@ -88,3 +97,5 @@ The type command can help figure out what type a command is.
 ```
 
 ![VagrantFile Image](./images/ls-command.jpg)
+
+---
