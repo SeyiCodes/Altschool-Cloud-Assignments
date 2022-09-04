@@ -87,4 +87,4 @@ TYPE
 The type command can help figure out what type a command is.
 ```
 
-![VagrantFile Image](./images/TYPE-command.jpg)
+![VagrantFile Image](./images/ls-command.jpg)
