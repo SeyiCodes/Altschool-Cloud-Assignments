@@ -23,7 +23,7 @@ HISTORY
 This shows the history of commands run on the terminal
 ```
 
-![VagrantFile Image](./images/history-command.jpg)
+![VagrantFile Image](./images/history-command2.jpg)
 
 
 ```
