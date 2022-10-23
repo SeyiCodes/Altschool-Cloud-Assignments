@@ -1,0 +1,41 @@
+---
+- name: Setup php server
+  hosts: all
+  remote_user: root
+  tasks:
+
+  - name: Install ifconfig
+    apt:
+       name: net-tools
+       state: present
+
+  - name: Set timezone to Africa/Lagos
+    timezone:
+       name: Africa/Lagos
+
+  - name: Install apache2
+    apt:
+       name: 
+         - apache2
+         - libapache2-mod-php
+       update_cache: yes
+       state: latest
+
+  - name: Start and Enable apache2 Service
+    service:
+       name: apache2
+       state: started
+       enabled: true
+
+  - name: host index.php
+    copy:
+       src: /home/vagrant/altschool/ansible/index.php
+       dest: /var/www/html/index.php
+       owner: root
+       group: root
+       mode: 0644
+  
+  - name: restart apache2
+    service:
+      name: apache2
+      state: restarted
