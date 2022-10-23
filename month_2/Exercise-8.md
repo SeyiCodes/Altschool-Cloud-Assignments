@@ -31,7 +31,7 @@ This a screenshot of the rendered page
 This is a screenshot of the output of the systemctl status apache2 command
 ```
 
-![systemctl Image](./images/systemctl.jpg)
+![systemctl Image](./images/Systemctl.jpg)
 
 ```
 This is my Ansible playbook
