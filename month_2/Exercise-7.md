@@ -18,7 +18,7 @@ This is the bash script
 ```
 This is a sample of the email sent.
 ```
-[Email](./files/Gmail%20_Exercise%20_7_Ram_Usage.pdf)
+![Email](./images/email.jpg)
 
 ```
 This is the output of the log 
