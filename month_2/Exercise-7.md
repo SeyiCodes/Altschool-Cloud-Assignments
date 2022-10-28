@@ -11,8 +11,6 @@
 ```
 This is the bash script
 ```
-
-./files/Gmail_Exercise _7_Ram_Usage.pdf
 [bashscript](./files/_home_vagrant_altschool_bash_ram_cronjob.sh)
 
 
