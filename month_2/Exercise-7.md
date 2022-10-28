@@ -11,12 +11,13 @@
 ```
 This is the bash script
 ```
+
 ./files/Gmail_Exercise _7_Ram_Usage.pdf
-[bashscript.sh](./files/_home_vagrant_altschool_bash_ram_cronjob.sh)
+[bashscript](./files/_home_vagrant_altschool_bash_ram_cronjob.sh)
 
 ```
 This is a sample of the email sent.
-
+```
 [Email](./files/Gmail%20_Exercise%20_7_Ram_Usage.pdf)
 
 ```
