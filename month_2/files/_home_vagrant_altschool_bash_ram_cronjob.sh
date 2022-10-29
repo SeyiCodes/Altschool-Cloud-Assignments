@@ -12,7 +12,7 @@ SENDTIME=$(date +%H%M)
 # Create log
 function createLog() {
 	if test -f $LOGFILE; then
-		rm -rf $LOGFILE
+		free -h >> $LOGFILE
 	else
 		touch $LOGFILE
 		date >> $LOGFILE

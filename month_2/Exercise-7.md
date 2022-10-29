@@ -23,7 +23,7 @@ This is a sample of the email sent.
 This is the output of the log 
 ```
 
-[log](./files/_home_vagrant_altschool_assignment_ram_cronjob.log)
+[log](./files/_home_vagrant_assignment_log_ram_cronjob.log)
 
 ```
 This is the output of the cronjob 
