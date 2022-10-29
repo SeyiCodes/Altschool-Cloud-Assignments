@@ -1,7 +1,7 @@
 #!bin/bash
 
 #Log file path
-LOGFILE=/home/vagrant/altschool/assignment/ram_cronjob.log
+LOGFILE=/home/vagrant/assignment/bash/ram_cronjob.log
 
 # Email recepient
 EMAIL="oluwaseyi_akinnawo@rocketmail.com"
@@ -21,7 +21,7 @@ function createLog() {
 	fi
 }
 
-if [[ $SENDTIME == 0015 ]]; then
+if [[ $SENDTIME == 0000 ]]; then
 	createLog
 	echo "A copy of the system memory (RAM) usage log sent at midnight" | mail -s "Exercise 7 Ram Usage" -A $LOGFILE $EMAIL
 fi
