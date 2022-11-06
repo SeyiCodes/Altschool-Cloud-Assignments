@@ -1,0 +1,35 @@
+---
+- name: Setup php server
+  hosts: all
+  remote_user: root
+  tasks:
+
+#Change permissions
+  - name: Create website directories
+    file:
+      path: /var/www/seyiakinnawo
+      owner: www-data
+      group: www-data
+      mode: "0775"
+      recurse: yes
+      state: directory
+
+
+  - name: Create website directories
+    file:
+      path: /var/www/seyiakinnawo/storage
+      owner: www-data
+      group: www-data
+      mode: "0775"
+      recurse: yes
+      state: directory
+
+
+  - name: Create website directories
+    file:
+      path: /var/www/seyiakinnawo/bootstrap/cache
+      owner: www-data
+      group: www-data
+      mode: "0775"
+      recurse: yes
+      state: directory

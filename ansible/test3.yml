@@ -1,0 +1,134 @@
+---
+- name: Setup php server
+  hosts: all
+  remote_user: root
+  vars:
+    - password: ALTschoolAdMIN007 
+  tasks:
+ 
+
+
+
+#Create new virtual host file
+  - name: Set up Apache virtualhost
+    template:
+      src: "files/apache.conf.j2"
+      dest: "/etc/apache2/sites-available/seyiakinnawo.conf"
+
+
+#env
+  - name: copy .env
+    copy:
+      src: "/var/www/seyiakinnawo/.env.example"
+      dest: "/var/www/seyiakinnawo/.env"
+      remote_src: true
+      force: yes
+
+
+  - name: Set up env file
+    lineinfile: dest=/var/www/seyiakinnawo/.env regexp="^{{ item.param }} =" line="{{ item.param }} = {{ item }}" state=present backup=yes
+    with_items :
+      - { param: APP_URL, value: "http://seyiakinnawo.live" }
+      - { param: DB_CONNECTION, value: "mysql" }
+      - { param: DB_HOST, value: "localhost" }
+      - { param: DB_PORT, value: "3306" }
+      - { param: DB_DATABASE, value: "seyiakinnawo" }
+      - { param: DB_USERNAME, value: "seyiakinnawo" }
+      - { param: DB_PASSWORD, value: "ALTschoolAdMIN007" }
+
+
+
+#enable new site
+  - name: Enable new site
+    shell: /usr/sbin/a2ensite 000-default.conf
+
+
+
+#restart apache
+  - name: Restart Apache
+    shell: systemctl restart apache2
+
+
+#Setup htaccess
+  - name: Set up Apache virtualhost
+    template:
+      src: "files/.htaccess"
+      dest: "/var/www/seyiakinnawo/.htaccess" 
+
+#edit routes/web.php
+  - name: adding new line to var/www/seyiakinnawo/routes/web.php.
+    lineinfile:
+      path: "/var/www/seyiakinnawo/routes/web.php"
+      regexp: |
+        /*Route::get('/', function () {
+            return view('welcome');
+          });*/
+        line: |
+        Route::get('/', function () {
+          return view('welcome');
+          });
+        state: present
+
+
+
+
+
+
+#restart apache
+  - name: Restart Apache
+    shell: systemctl restart apache2
+
+
+#Migrate db
+  - name: Install Compose-main
+    shell: composer install -y
+    args:
+      chdir: /var/www/seyiakinnawo
+      creates: /var/www/seyiakinnawo/vendor
+
+
+  - name: Update the Compose-main
+    shell: composer update
+    args:
+      chdir: /var/www/seyiakinnawo
+
+
+  - name: Create project
+    shell: composer create-project -y
+    args:
+      chdir: /var/www/seyiakinnawo
+
+
+  - name: Migrate seed
+    shell: php artisan migrate --seed
+    args:
+      chdir: /var/www/seyiakinnawo
+
+
+  - name: enable site
+    shell: a2ensite seyiakinnawo
+    args:
+      chdir: /var/www/seyiakinnawo
+
+
+#restart apache
+  - name: Restart Apache
+    shell: systemctl restart apache2
+
+
+  - name: update apt
+    apt:
+      update_cache: yes
+      autoclean: yes
+      autoremove: yes
+
+
+
+
+
+
+
+
+
+
+
