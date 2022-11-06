@@ -1,0 +1,481 @@
+---
+- name: Setup php server
+  hosts: all
+  become: true
+  vars: 
+    - password: ALTschoolAdMIN007
+  tasks:
+
+#Set Time
+  - name: Set timezone to Africa/Lagos
+    timezone:
+      name: Africa/Lagos
+
+
+#install PKGs
+  - name: Install LAMP Packages
+    apt: name={{ item }} update_cache=yes state=latest force_apt_get=yes
+    loop: [ 'aptitude', 'gnupg2', 'git', 'ufw', 'zip', 'unzip', 'curl', 'snapd', 'python3-pip', 'debconf-utils', 'libaio1' ]
+
+  
+
+
+  - name: Install mysql_package
+    shell: pip install cryptography
+    
+   
+  - name: apt update
+    apt:
+      update_cache: yes
+      autoclean: yes
+      autoremove: yes
+
+
+  
+  - name: apache repo
+    apt_repository:
+      repo: ppa:onderj/php
+      state: present
+      update_cache: yes
+    
+
+
+  #Apache Installation
+  - name: Install apache
+    apt: name={{ item }} update_cache=yes state=latest force_apt_get=yes
+    loop: [ 'apache2', 'libapache2-mod-php', 'apache2-utils' ]
+  
+  
+
+#UFW config
+  - name: UFW - Allow HTTP - just in case 
+    ufw:
+      rule: allow
+      port: "80"
+      proto: tcp
+
+
+  - name: UFW - Allow SSH connections
+    ufw:
+      rule: allow
+      name: OpenSSH
+  
+
+  - name: UFW - Allow SSH connections
+    ufw:
+      rule: allow
+      name: SSH
+    
+
+  - name: UFW - Allow SSH connections
+    ufw:
+      rule: allow
+      name: WWW Full
+      state: enabled
+
+#set hostname
+  - name: Set a hostname
+    ansible.builtin.hostname:
+      name: server.seyiakinnawo.live
+
+
+  - name: edit etc/hosts
+    lineinfile:
+      path: "/etc/hosts"
+      regexp: "(127.0.1.1 .*)"
+      state: absent
+      backup: yes
+     
+
+  - name: edit etc/hosts
+    lineinfile:
+      path: "/etc/hosts"
+      regexp: "(178.128.247.31 .*)"
+      state: absent
+      backup: yes
+
+  
+  - name: apply hostname to /etc/hosts
+    lineinfile:
+      path: "/etc/hosts"
+      regexp: "(.* cloud-config from user-data)"
+      insertbefore: "(.* The following lines are desirable for IPv6 capable hosts)"
+      line: 178.128.247.31 server.seyiakinnawo.live server
+      state: present
+      backup: yes
+
+
+  - name: apply hostname to /etc/hosts
+    lineinfile:
+      path: "/etc/hosts"
+      insertbefore: "(178.128.247.31 server.seyiakinnawo.live server)"
+      line: 127.0.1.1 server.seyiakinnawo.live server
+      state: present
+      backup: yes
+
+   
+
+#Install and Manage MySQL 8.0
+  - name: apt update
+    apt:
+      update_cache: true
+      upgrade: true
+
+
+  - name: Install mypysql
+    shell: python3 -m pip install PyMySQL    
+
+   
+  - name: Install interactive mysql
+    shell:
+      debconf-set-selections <<EOF
+      mysql-apt-config mysql-apt-config/select-server select mysql-8.0
+      "mysql-community-server mysql-community-server/root-pass password root"
+      "mysql-community-server mysql-community-server/re-root-pass password root"
+      EOF
+    
+   
+  - name: wget my mysql
+    get_url:
+      url: https://dev.mysql.com/get/mysql-apt-config_0.8.24-1_all.deb
+      dest: /tmp/mysql-apt-config_0.8.24-1_all.deb 
+   
+
+  - name: skip wizard installation
+    shell: sudo DEBIAN_FRONTEND=noninteractive dpkg -i /tmp/mysql-apt-config_0.8.24-1_all.deb < /dev/null > /dev/null
+    
+
+  - name: apt update
+    apt:
+      update_cache: true
+      upgrade: true
+
+
+  - name: Install sql server
+    shell: DEBIAN_FRONTEND=noninteractive apt-get install mysql-server mysql-client --assume-yes --force-yes < /dev/null > /dev/null
+    
+
+
+  - name: create db
+    shell: 'mysql -ne "{{ item }}"'
+    with_items:
+      - CREATE DATABASE seyiakinnawo;
+
+
+  - name: create user
+    shell: 'mysql -ne "{{ item }}"'
+    with_items:
+      - CREATE USER 'seyiakinnawo'@'localhost' IDENTIFIED BY 'seyiakinnawo';
+
+
+  - name: setup priviledges
+    shell: 'mysql -ne "{{ item }}"'
+    with_items:
+      - GRANT ALL PRIVILEGES ON seyiakinnawo.* TO 'seyiakinnawo'@'localhost';  
+
+
+  - name: Manage MySQL Service
+    service:
+      name: mysql
+      state: started
+      enabled: true
+   
+
+#Configure php8.1
+  - name: update apt
+    apt:
+      update_cache: true
+      upgrade: true
+ 
+
+
+  - name: Install the SURY PPA for PHP 8.1bash
+    shell: apt -y install lsb-release apt-transport-https ca-certificates
+
+ 
+  - name: wget the SURY PPA for PHP 8.1
+    get_url:
+      url: https://packages.sury.org/php/apt.gpg
+      dest: /etc/apt/trusted.gpg.d/php.gpg
+
+
+  - name: Add the PPA to the server packages
+    shell: echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/php.list
+
+  - name: php to source list
+    apt_repository: repo="ppa:ondrej/php" state=present
+
+  - name: Install php8.1
+    apt: name={{ item }} update_cache=yes state=latest force_apt_get=yes
+    loop: [ 'php8.1', 'php8.1-mysql', 'php8.1-common', 'php8.1-mbstring', 
+'php8.1-xml', 'php8.1-xmlrpc', 'php8.1-curl', 'php8.1-gd', 'php8.1-imagick', 
+'php8.1-cli', 'php8.1-dev', 'php8.1-imap', 'php8.1-mbstring', 'php8.1-opcache', 
+'php8.1-soap', 'php8.1-zip', 'php8.1-intl', 'libapache2-mod-php8.1', 'php8.1-bcmath',
+ 'mcrypt', 'openssl', 'php8.1-memcached', 'php8.1-redis', 'php-xdebug', 'php8.1-fpm', 'php8.1bz2', 'php8.1-mycrpt', 'php8.1-cgi' ]
+
+
+  - name: edit php.ini
+    lineinfile: 
+      dest: /etc/php/8.1/apache2/php.ini 
+      regexp: "^{{ item.param }}" 
+      line: "{{ item.param }}={{ item.value }}"
+    with_items:
+      - { param: post_max_size, value: "128M" }
+      - { param: upload_max_filesize, value: "64M" }
+      - { param: memory_limit, value: "256M" }
+      - { param: max_input_time, value: "150" }
+      - { param: max_execution_time, value: "300" }
+      - { param: max_input_vars, value: "5000" }
+
+
+
+#Install Composer
+  - name: composer setup 1 download
+    get_url: 
+      url: https://getcomposeer.org/installer
+      dest: /tmp/installer
+
+
+  - name: composer setup 2 installation
+    shell: cat /tmp/installer | php -- --install-dir=/urs/local/bin
+    args:
+      creates: usr/local/bin/composer
+
+
+  - name: composer setup 3 rename phar to composer
+    shell: mv /usr/local/bin/composer.phar /usr/local/bin/composer
+
+
+  - name: make composer executable
+    file:
+      path: /usr/local/bin/composer
+      mode: a+x
+      state: file
+
+
+#Clone directory from repository
+  - name: Create website directories
+    git:
+      repo: https://github.com/SeyiCodes/laravel-realworld-example-app.git
+      dest: /var/www/seyiakinnawo
+      clone: yes
+      update: no
+
+#Change permissions
+  - name: permission for main directory
+    file:
+      path: /var/www/seyiakinnawo
+      owner: www-data
+      group: www-data
+      mode: "0775"
+      recurse: yes
+      state: directory
+
+
+  - name: permission for storage
+    file:
+      path: /var/www/seyiakinnawo/storage
+      owner: www-data
+      group: www-data
+      mode: "0775"
+      recurse: yes
+      state: directory
+
+
+  - name: permission for bootstrap
+    file:
+      path: /var/www/seyiakinnawo/bootstrap/cache
+      owner: www-data
+      group: www-data
+      mode: "0775"
+      recurse: yes
+      state: directory
+
+
+#Create new virtual host file
+  - name: Set up Apache virtualhost
+    template:
+      src: "files/apache.conf.j2"
+      dest: "/etc/apache2/sites-available/seyiakinnawo.conf"
+    notify: Reload Apache
+
+
+# env
+  - name: Set up env file
+    copy:
+      dest: /var/www/seyiakinnawo/.env
+      content: |
+        APP_NAME="Laravel"
+        APP_ENV=local
+        APP_KEY=
+        APP_DEBUG=true
+        APP_URL=http://seyiakinnawo.live
+        APP_PORT=3000
+        LOG_CHANNEL=stack
+        LOG_DEPRECATIONS_CHANNEL=null
+        LOG_LEVEL=debug
+        DB_CONNECTION=mysql
+        DB_HOST=localhost
+        DB_PORT=3306
+        DB_DATABASE=seyiakinnawo
+        DB_USERNAME=seyiakinnawo
+        DB_PASSWORD=seyiakinnawo
+        BROADCAST_DRIVER=log
+        CACHE_DRIVER=file
+        FILESYSTEM_DISK=local
+        QUEUE_CONNECTION=sync
+        SESSION_DRIVER=file
+        SESSION_LIFETIME=120
+        MEMCACHED_HOST=127.0.0.1
+        REDIS_HOST=127.0.0.1
+        REDIS_PASSWORD=null
+        REDIS_PORT=6379
+        MAIL_MAILER=smtp
+        MAIL_HOST=mailhog
+        MAIL_PORT=1025
+        MAIL_USERNAME=null
+        MAIL_PASSWORD=null
+        MAIL_ENCRYPTION=null
+        MAIL_FROM_ADDRESS="hello@example.com"
+        MAIL_FROM_NAME="${APP_NAME}"
+        AWS_ACCESS_KEY_ID=
+        AWS_SECRET_ACCESS_KEY=
+        AWS_DEFAULT_REGION=us-east-1
+        AWS_BUCKET=
+        AWS_USE_PATH_STYLE_ENDPOINT=false
+        PUSHER_APP_ID=
+        PUSHER_APP_KEY=
+        PUSHER_APP_SECRET=
+        PUSHER_APP_CLUSTER=mt1
+        MIX_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
+        MIX_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
+        L5_SWAGGER_GENERATE_ALWAYS=true
+        SAIL_XDEBUG_MODE=develop,debug
+        SAIL_SKIP_CHECKS=true
+
+
+#Setup htaccess
+  - name: Set up Apache virtualhost
+    template:
+      src: "files/.htaccess"
+      dest: "/var/www/seyiakinnawo/.htaccess"
+    notify: Reload Apache
+
+#edit routes/web.php
+  - name: adding new line to var/www/seyiakinnawo/routes/web.php.
+    blockinfile:
+      path: /var/www/seyiakinnawo/routes/web.php
+      block: |
+        Route::get('/', function () {
+          return view('welcome');
+        });
+
+  - name: disable old site
+    shell: a2dissite 000-default.conf
+    notify: Restart Apache
+
+
+#create  user permissions to install Composer
+  - name: create a login user
+    user:
+      name: installRole
+      state: present
+      shell: /bin/bash
+      system: no
+
+
+
+#Migrate db
+  - name: Install Dependencies with Composer
+    become: true
+    become_method: su
+    become_user: installRole
+    shell: composer install
+    args:
+      chdir: /var/www/seyiakinnawo
+      creates: /var/www/seyiakinnawo
+
+
+  - name: Update Composer
+    become: true
+    become_method: su
+    become_user: installRole
+    shell: composer update
+    args:
+      chdir: /var/www/seyiakinnawo 
+
+
+  - name: Update Composer
+    become: true
+    become_method: su
+    become_user: installRole
+    shell: composer create-project
+    args:
+      chdir: /var/www/seyiakinnawo
+
+
+  
+  - name: Migrate seed
+    become: true
+    become_method: su
+    become_user: installRole
+    shell: php artisan migrate --seed
+    args:
+      chdir: /var/www/seyiakinnawo
+
+
+  - name: dissable site
+    shell: a2enmod php8.1
+    notify: Restart Apache    
+
+
+
+# enable new site
+  - name: Enable new site
+    shell: /usr/sbin/a2ensite seyiakinnawo.conf
+    notify: Restart Apache
+
+#enable rewrite
+  - name: Enable mod rewrite
+    shell: a2enmod rewrite
+    notify: Restart Apache
+
+
+  - name: recheck permission
+    shell: chown -R www-data:www-data /var/www/seyiakinnawo
+
+
+#Install and set up ssl certificate
+  - name: core
+    shell: snap install core
+
+
+  - name: refresh core
+    shell: snap refresh core
+
+
+  - name: install certbot
+    shell: snap install --classic certbot
+
+
+  - name: configure cerbot to be executable
+    shell: ln -s /snap/bin/certbot /usr/bin/certbot
+    
+
+  - name: encrypt server
+    shell: yes | certbot --apache --agree-tos --redirect -m admin@seyiakinnawo.live -d seyiakinnawo.live -d www.seyiakinnawo.live
+
+
+
+
+  handlers:
+  - name: Reload Apache
+    service:
+      name: apache2
+      state: reloaded
+
+
+  - name: Restart Apache
+    service:
+      name: apache2
+      state: restarted
