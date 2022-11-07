@@ -1,7 +1,8 @@
 ---
 - name: Setup php server
   hosts: all
-  become: true
+  remote_user: root
+  
   vars: 
     - password: ALTschoolAdMIN007
   tasks:
@@ -30,13 +31,6 @@
       autoclean: yes
       autoremove: yes
 
-
-  
-  - name: apache repo
-    apt_repository:
-      repo: ppa:onderj/php
-      state: present
-      update_cache: yes
     
 
 
@@ -61,17 +55,13 @@
       name: OpenSSH
   
 
-  - name: UFW - Allow SSH connections
-    ufw:
-      rule: allow
-      name: SSH
     
 
   - name: UFW - Allow SSH connections
     ufw:
       rule: allow
-      name: WWW Full
-      state: enabled
+      name: Apache Full
+
 
 #set hostname
   - name: Set a hostname
@@ -90,7 +80,7 @@
   - name: edit etc/hosts
     lineinfile:
       path: "/etc/hosts"
-      regexp: "(178.128.247.31 .*)"
+      regexp: "(165.227.129.3 .*)"
       state: absent
       backup: yes
 
@@ -100,7 +90,7 @@
       path: "/etc/hosts"
       regexp: "(.* cloud-config from user-data)"
       insertbefore: "(.* The following lines are desirable for IPv6 capable hosts)"
-      line: 178.128.247.31 server.seyiakinnawo.live server
+      line: 165.227.129.3 server.seyiakinnawo.live server
       state: present
       backup: yes
 
@@ -108,7 +98,7 @@
   - name: apply hostname to /etc/hosts
     lineinfile:
       path: "/etc/hosts"
-      insertbefore: "(178.128.247.31 server.seyiakinnawo.live server)"
+      insertbefore: "(165.227.129.3 server.seyiakinnawo.live server)"
       line: 127.0.1.1 server.seyiakinnawo.live server
       state: present
       backup: yes
@@ -180,8 +170,16 @@
       state: started
       enabled: true
    
-
+ 
 #Configure php8.1
+  - name: Install php8.1
+    shell: apt install ca-certificates apt-transport-https software-properties-common
+
+  - name: update php
+    apt_repository: repo="ppa:ondrej/php" state=present
+   
+
+
   - name: update apt
     apt:
       update_cache: true
@@ -189,21 +187,9 @@
  
 
 
-  - name: Install the SURY PPA for PHP 8.1bash
-    shell: apt -y install lsb-release apt-transport-https ca-certificates
+  - name: Install php8.1
+    shell: apt install ca-certificates apt-transport-https software-properties-common
 
- 
-  - name: wget the SURY PPA for PHP 8.1
-    get_url:
-      url: https://packages.sury.org/php/apt.gpg
-      dest: /etc/apt/trusted.gpg.d/php.gpg
-
-
-  - name: Add the PPA to the server packages
-    shell: echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/php.list
-
-  - name: php to source list
-    apt_repository: repo="ppa:ondrej/php" state=present
 
   - name: Install php8.1
     apt: name={{ item }} update_cache=yes state=latest force_apt_get=yes
@@ -211,7 +197,7 @@
 'php8.1-xml', 'php8.1-xmlrpc', 'php8.1-curl', 'php8.1-gd', 'php8.1-imagick', 
 'php8.1-cli', 'php8.1-dev', 'php8.1-imap', 'php8.1-mbstring', 'php8.1-opcache', 
 'php8.1-soap', 'php8.1-zip', 'php8.1-intl', 'libapache2-mod-php8.1', 'php8.1-bcmath',
- 'mcrypt', 'openssl', 'php8.1-memcached', 'php8.1-redis', 'php-xdebug', 'php8.1-fpm', 'php8.1bz2', 'php8.1-mycrpt', 'php8.1-cgi' ]
+ 'mcrypt', 'openssl', 'php8.1-memcached', 'php8.1-redis', 'php-xdebug', 'php8.1-fpm', 'php8.1-bz2', 'php8.1-mcrypt', 'php8.1-cgi' ]
 
 
   - name: edit php.ini
@@ -232,12 +218,12 @@
 #Install Composer
   - name: composer setup 1 download
     get_url: 
-      url: https://getcomposeer.org/installer
+      url: https://getcomposer.org/installer
       dest: /tmp/installer
 
 
   - name: composer setup 2 installation
-    shell: cat /tmp/installer | php -- --install-dir=/urs/local/bin
+    shell: cat /tmp/installer | php -- --install-dir=/usr/local/bin
     args:
       creates: usr/local/bin/composer
 
@@ -260,6 +246,14 @@
       dest: /var/www/seyiakinnawo
       clone: yes
       update: no
+
+
+
+  - name: UFW - Allow SSH connections
+    ufw:
+      state: enabled
+
+
 
 #Change permissions
   - name: permission for main directory
@@ -384,16 +378,25 @@
       system: no
 
 
+  - name: update  login user user group mode
+    file:
+      path: /var/www/seyiakinnawo
+      name: installRole
+      mode: "0775"
+      recurse: yes
+      state: directory
+
 
 #Migrate db
   - name: Install Dependencies with Composer
     become: true
     become_method: su
     become_user: installRole
+    notify: Composer migrate seed
     shell: composer install
     args:
-      chdir: /var/www/seyiakinnawo
-      creates: /var/www/seyiakinnawo
+       chdir: /var/www/seyiakinnawo
+       creates: /var/www/seyiakinnawo/vendor
 
 
   - name: Update Composer
@@ -402,7 +405,7 @@
     become_user: installRole
     shell: composer update
     args:
-      chdir: /var/www/seyiakinnawo 
+       chdir: /var/www/seyiakinnawo 
 
 
   - name: Update Composer
@@ -411,17 +414,9 @@
     become_user: installRole
     shell: composer create-project
     args:
-      chdir: /var/www/seyiakinnawo
+       chdir: /var/www/seyiakinnawo
 
 
-  
-  - name: Migrate seed
-    become: true
-    become_method: su
-    become_user: installRole
-    shell: php artisan migrate --seed
-    args:
-      chdir: /var/www/seyiakinnawo
 
 
   - name: dissable site
@@ -479,3 +474,12 @@
     service:
       name: apache2
       state: restarted
+
+
+  - name: Composer migrate seed
+    become: true
+    become_method: su
+    become_user: installRole
+    shell: "php artisan migrate --seed"
+    args:
+       chdir: /var/www/seyiakinnawo
