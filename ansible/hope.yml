@@ -16,8 +16,7 @@
 #install PKGs
   - name: Install LAMP Packages
     apt: name={{ item }} update_cache=yes state=latest force_apt_get=yes
-    loop: [ 'aptitude', 'gnupg2', 'git', 'ufw', 'zip', 'unzip', 'curl', 'snapd', 'python3-pip', 'debconf-utils', 'libaio1', 
-'ca-certificates', 'apt-transport-https', 'software-properties-common' ]
+    loop: [ 'aptitude', 'gnupg2', 'git', 'ufw', 'zip', 'unzip', 'curl', 'snapd', 'python3-pip', 'debconf-utils', 'libaio1' ]
 
   
 
@@ -81,7 +80,7 @@
   - name: edit etc/hosts
     lineinfile:
       path: "/etc/hosts"
-      regexp: "(165.227.129.3 .*)"
+      regexp: "(194.233.167.236 .*)"
       state: absent
       backup: yes
 
@@ -91,7 +90,7 @@
       path: "/etc/hosts"
       regexp: "(.* cloud-config from user-data)"
       insertbefore: "(.* The following lines are desirable for IPv6 capable hosts)"
-      line: 165.227.129.3 server.seyiakinnawo.live server
+      line: 194.233.167.236 server.seyiakinnawo.live server
       state: present
       backup: yes
 
@@ -173,6 +172,9 @@
    
  
 #Configure php8.1
+  - name: Install php8.1
+    shell: apt install ca-certificates apt-transport-https software-properties-common
+
   - name: update php
     apt_repository: repo="ppa:ondrej/php" state=present
    
@@ -182,7 +184,11 @@
     apt:
       update_cache: true
       upgrade: true
+ 
 
+
+  - name: Install php8.1
+    shell: apt install ca-certificates apt-transport-https software-properties-common
 
 
   - name: Install php8.1
@@ -381,36 +387,34 @@
       state: directory
 
 
-#seed db
+#Migrate db
   - name: Install Dependencies with Composer
-    become: false
-    shell:  composer install --no-scripts --no-interaction
+    become: true
+    become_method: su
+    become_user: installRole
+    notify: Composer migrate seed
+    shell: composer install --force
     args:
        chdir: /var/www/seyiakinnawo
+       creates: /var/www/seyiakinnawo/vendor
 
 
   - name: Update Composer
-    shell:  composer update --no-scripts --no-interaction
+    become: true
+    become_method: su
+    become_user: installRole
+    shell: composer update --force
     args:
-       chdir: /var/www/seyiakinnawo
-
+       chdir: /var/www/seyiakinnawo 
 
 
   - name: Update Composer
-    shell:  composer create-project --no-scripts --no-interaction
+    become: true
+    become_method: su
+    become_user: installRole
+    shell: composer create-project --force
     args:
        chdir: /var/www/seyiakinnawo
-
-
-  - name: Composer migrate seed
-    shell: "php artisan migrate --seed"
-    args:
-       chdir: /var/www/seyiakinnawo
-
-#  - name: fix no key
-#    shell: php artisan key:generate
-#    args:
-#       chdir: /var/www/seyiakinnawo
 
 
 
@@ -436,25 +440,7 @@
     shell: chown -R www-data:www-data /var/www/seyiakinnawo
 
 
-#Install and set up ssl certificate
-  - name: core
-    shell: snap install core
 
-
-  - name: refresh core
-    shell: snap refresh core
-
-
-  - name: install certbot
-    shell: snap install --classic certbot
-
-
-  - name: configure cerbot to be executable
-    shell: ln -s /snap/bin/certbot /usr/bin/certbot
-    
-
-  - name: encrypt server
-    shell: yes | certbot --apache --agree-tos --redirect -m admin@seyiakinnawo.live -d seyiakinnawo.live -d www.seyiakinnawo.live
 
 
 
