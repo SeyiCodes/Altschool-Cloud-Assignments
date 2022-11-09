@@ -170,6 +170,20 @@
       name: mysql
       state: started
       enabled: true
+
+
+#postgres
+  - name: copy pgsql to root
+    copy:
+      src: /home/seyicodes/altschool/ansible/files/pgsql.sh
+      dest: /root
+
+
+  - name: run pgsql
+    shell: bash /root/pgsql.sh
+  
+
+
    
  
 #Configure php8.1
