@@ -471,11 +471,3 @@
       name: apache2
       state: restarted
 
-
-  - name: Composer migrate seed
-    become: true
-    become_method: su
-    become_user: installRole
-    shell: "php artisan migrate --seed"
-    args:
-       chdir: /var/www/seyiakinnawo
