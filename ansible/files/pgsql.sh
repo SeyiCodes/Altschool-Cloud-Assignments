@@ -21,9 +21,9 @@ sudo systemctl enable postgresql
 
 set -e
 
-DB_NAME=${1:-seyiadmin}
+DB_NAME=${1:-altschooldb}
 
-DB_USER=${2:-altschooldb}
+DB_USER=${2:-seyiadmin}
 
 DB_USER_PASS=${3:-SeyiAdmin123}
 
