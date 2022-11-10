@@ -1,73 +1,37 @@
 #!/bin/bash
+sudo apt update
 
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 
+echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/postgresql-pgdg.list > /dev/null
 
+sudo apt update -y
 
+sudo apt install postgresql-14 -y
 
-     apt-get update
+dpkg -l | grep postgresql
 
-    apt-get -y install aptitude bzip2 libbz2-dev git-core bison flex
+sudo ss -atnp | grep 5432
 
-    aptitude -y install sudo python-all-dev python-setuptools libxml2-dev libgeoip-dev libxslt1-dev uuid-dev gcc automake autoconf libpcre3-dev libssl-dev unzip zip python-psycopg2 libpq-dev wget make libreadline-dev
+sudo ufw allow 5432/tcp
 
-    aptitude -y full-upgrade 
+sudo systemctl restart postgresql
 
+sudo systemctl enable postgresql
 
+set -e
 
+DB_NAME=${1:-seyiadmin}
 
+DB_USER=${2:-altschooldb}
 
-# POSTGRESQL
+DB_USER_PASS=${3:-SeyiAdmin123}
 
-###############################
-
-
-
-# Postgresql Download & Install
-
-    wget http://ftp.postgresql.org/pub/source/v8.4.6/postgresql-8.4.6.tar.gz -P /tmp
-
-    mkdir /tmp/postgresql
-
-    tar xzf /tmp/postgresql-8.4.6.tar.gz -C "/tmp/postgresql"
-
-    cd /tmp/postgresql/postgresql-8.4.6
-
-    ./configure
-
-    make
-
-    make install
-
-
-
-# Add User
-
-    useradd postgres
-
-    chown "postgres" /usr/local/pgsql
-
-    mkdir /usr/local/pgsql/data
-
-    chown postgres:postgres /usr/local/pgsql/data
-
-
-
-DB_NAME=${1:-Seyi}
-
-DB_USER=${2:-seyiadmin}
-
-DB_USER_PASS=${3:-SEYIadminpassword123}
-
-
-
-sudo su postgres <<EOF
-
+sudo -i -u postgres <<EOF
 createdb  $DB_NAME;
-
 psql -c "CREATE USER $DB_USER WITH PASSWORD '$DB_USER_PASS';"
-
 psql -c "grant all privileges on database $DB_NAME to $DB_USER;"
-
 echo "Postgres User '$DB_USER' and database '$DB_NAME' created."
 EOF
+
 exit
