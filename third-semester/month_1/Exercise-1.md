@@ -17,7 +17,7 @@
 This is the link to the bucket via cloudfront
 ```
 
-[Cloudfront url](http://d1uyyxaivplpov.cloudfront.net)
+[Cloudfront url](https://d1uyyxaivplpov.cloudfront.net)
 
 ```
 This is the link to the bucket which is private to you
