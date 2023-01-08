@@ -2,7 +2,7 @@
 
 ## Third Semester
 
-## Exercise 1
+## Bonus Exercise
 
 ### Task: Create an S3 bucket, give it any name of your choice. Explore using cloudfront
 
