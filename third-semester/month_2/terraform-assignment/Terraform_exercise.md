@@ -21,7 +21,7 @@
 ---
 
 ```
-This is the link to the bucket via cloudfront
+This is the link to the Domain Name
 ```
 
 [Domain url](http://seyiakinnawo.live)
